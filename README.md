@@ -1,2 +1,2 @@
 # super-duper-octo-disco
-LeetCode solutions in Rust. Aims to improve coding skills, problem-solving abilities, and knowledge of data structures &amp; algorithms. Includes unit tests for correctness and efficiency.
+This repository contains my solutions and progress for various LeetCode problems, implemented exclusively in Rust. As I continue to learn more coding patterns and improve my problem-solving skills, I will iterate and enhance my solutions to ensure better efficiency and understanding. Each problem includes unit tests to ensure code correctness. This repository serves as a showcase of my knowledge in data structures, algorithms, and Rust programming language.
