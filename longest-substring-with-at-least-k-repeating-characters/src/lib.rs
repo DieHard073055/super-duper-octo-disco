@@ -1,32 +1,31 @@
 use std::collections::HashMap;
 
-enum WindowStatus {
-    AllValid(i32),
-    Valid((Vec<char>, i32)),
-    NoValid,
-}
 struct Solution {}
 impl Solution {
-    fn len_repeating_substring_in_window(window: &HashMap<char, i32>, k: &i32) -> WindowStatus {
-        let mut string_count = 0;
-        let mut valid = true;
-        let mut invalid_chars = vec![];
-        for (key, val) in window.iter() {
-            if val >= &k {
-                string_count += val;
+    fn count_all_unique_letters(s: &str) -> usize {
+        let mut s_map = HashMap::new();
+        s.chars()
+            .into_iter()
+            .for_each(|letter| *s_map.entry(letter).or_insert(0) += 1);
+        return s_map.keys().len();
+    }
+    fn count_unique_letters(window: &HashMap<char, i32>) -> usize {
+        window.keys().len()
+    }
+    fn unique_letters_with_at_least(window: &HashMap<char, i32>, k: i32) -> i32 {
+        let mut result = 0i32;
+        let mut non_k_repeat = false;
+        window.into_iter().for_each(|(_, freq)| {
+            if freq >= &k {
+                result += freq;
             } else {
-                valid = false;
-                invalid_chars.push(key.clone());
+                non_k_repeat = true;
             }
-        }
-        if string_count > 0 {
-            if valid {
-                WindowStatus::AllValid(string_count)
-            } else {
-                WindowStatus::Valid((invalid_chars, string_count))
-            }
+        });
+        if !non_k_repeat {
+            result
         } else {
-            WindowStatus::NoValid
+            0i32
         }
     }
     pub fn longest_substring(s: String, k: i32) -> i32 {
@@ -37,45 +36,52 @@ impl Solution {
             return 0;
         }
         let s_letters = s.chars().collect::<Vec<char>>();
-        let mut start = 0;
+        let mut start: i32 = -1;
         let mut end: i32 = -1;
-        let mut window = HashMap::new();
+        let mut window: HashMap<char, i32> = HashMap::new();
         let mut max_substring = 0;
+        let s_unique_keys = Solution::count_all_unique_letters(s.as_str());
+        // println!("s_unique_keys: {:?}", s_unique_keys);
 
-        while end < s_letters.len() as i32 - 1 {
-            end += 1;
-            let next_letter = s_letters[end as usize];
-            *window.entry(next_letter).or_insert(0) += 1;
+        for current_unique in 0..s_unique_keys {
+            // println!("current_unique: {:}", current_unique);
+            while end < s_letters.len() as i32 - 1 {
+                // println!("s: {:}", s);
+                // println!("k: {:}", k);
+                // println!("window: {:?}", window);
 
-            loop {
-                match Solution::len_repeating_substring_in_window(&window, &k) {
-                    WindowStatus::NoValid => {
-                        break;
-                    }
-                    WindowStatus::Valid((invalid_chars, string_count)) => {
-                        let window_size = end - start;
-                        if ((window_size - string_count) - invalid_chars.len() as i32) > 1 {
-                            let previous_letter = s_letters[start as usize];
-                            start += 1;
-                            *window.entry(previous_letter).or_insert(0) -= 1;
-                            if window.get(&previous_letter) == Some(&0) {
-                                window.remove(&previous_letter);
-                            }
-                            if string_count > max_substring {
-                                max_substring = string_count;
-                            }
-                        } else {
-                            break;
-                        }
-                    }
-                    WindowStatus::AllValid(string_count) => {
-                        if string_count > max_substring {
-                            max_substring = string_count;
-                        }
-                        break;
+                // println!("max_substring: {:}", max_substring);
+                if Solution::count_unique_letters(&window) <= (current_unique + 1) {
+                    end += 1;
+                    let current_letter = s_letters[end as usize];
+                    // println!("end: {:}", end);
+                    // println!("current_letter: {:}", current_letter);
+                    *window.entry(current_letter).or_insert(0) += 1;
+                } else {
+                    start += 1;
+                    let start_letter = s_letters[start as usize];
+                    // println!("start: {:}", start);
+                    // println!("start_letter: {:}", start_letter);
+                    *window.entry(start_letter).or_insert(0) -= 1;
+                    if window.get(&start_letter) < Some(&1) {
+                        window.remove(&start_letter);
                     }
                 }
+                let current_k_unique_letter_count =
+                    Solution::unique_letters_with_at_least(&window, k);
+                // println!(
+                //     "current_k_unique_letter_count: {:}",
+                //     current_k_unique_letter_count
+                // );
+                if current_k_unique_letter_count > max_substring {
+                    max_substring = current_k_unique_letter_count;
+                }
+                // println!("window: {:?}", window);
+                // println!("\n");
             }
+            end = -1;
+            start = -1;
+            window = HashMap::new();
         }
 
         max_substring
@@ -99,7 +105,7 @@ mod tests {
             ("", 1, 0),
             ("ababbc", 2, 5),
             ("ababacb", 3, 0),
-            // ("bbaaacbd", 3, 3),
+            ("bbaaacbd", 3, 3),
         ];
 
         for (s, k, expected) in cases {
