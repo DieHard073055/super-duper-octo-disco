@@ -13,19 +13,11 @@ impl Solution {
         window.keys().len()
     }
     fn unique_letters_with_at_least(window: &HashMap<char, i32>, k: i32) -> i32 {
-        let mut result = 0i32;
-        let mut non_k_repeat = false;
-        window.into_iter().for_each(|(_, freq)| {
-            if freq >= &k {
-                result += freq;
-            } else {
-                non_k_repeat = true;
-            }
-        });
-        if !non_k_repeat {
-            result
+        let result = window.values().filter(|&&freq| freq >= k).sum::<i32>();
+        if window.values().any(|&freq| freq < k) {
+            0
         } else {
-            0i32
+            result
         }
     }
     pub fn longest_substring(s: String, k: i32) -> i32 {
