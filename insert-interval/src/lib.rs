@@ -1,61 +1,79 @@
 struct Solution {}
 impl Solution {
     pub fn insert(intervals: Vec<Vec<i32>>, new_interval: Vec<i32>) -> Vec<Vec<i32>> {
-        let mut output_intervals = vec![];
-        let mut inserted = false;
-        let mut merged = false;
+        let mut output = vec![];
         if intervals.len() < 1 {
-            inserted = true;
-            output_intervals.push(new_interval);
-            return output_intervals;
+            output.push(new_interval);
+            return output;
         }
-        let b_start = new_interval[0];
-        let b_end = new_interval[1];
-        for i in 0..intervals.len() {
-            let a_start = intervals[i][0];
-            let a_end = intervals[i][1];
-            if b_start < a_start && b_end >= a_end && !merged && !inserted {
-                inserted = true;
-                merged = true;
-                output_intervals.push(vec![b_start, b_end]);
-            } else if a_start > b_start && a_end > b_end && a_start <= b_end && !inserted && !merged
-            {
-                inserted = true;
-                merged = true;
-                output_intervals.push(vec![b_start, a_end]);
-            } else if a_start > b_end && !inserted && !merged {
-                inserted = true;
-                merged = true;
-                output_intervals.push(vec![b_start, b_end]);
-                output_intervals.push(vec![a_start, a_end]);
-            } else if a_start <= b_start && a_end >= b_start && !inserted {
-                // intersection
-                if a_end >= b_end {
-                    output_intervals.push(vec![a_start, a_end]);
-                } else {
-                    output_intervals.push(vec![a_start, b_end]);
+        let [b_start, b_end] = [new_interval[0], new_interval[1]];
+        let mut intersected = false;
+        let mut done = false;
+
+        for interval in intervals {
+            let [a_start, a_end] = [interval[0], interval[1]];
+            match (intersected, done) {
+                (false, false) => {
+                    // not intersected, not done
+                    if b_end <= a_end {
+                        intersected = true;
+                        done = true;
+                        // check if b is before a.
+                        if b_end < a_start {
+                            // set b contents first then a.
+                            output.push(vec![b_start, b_end]);
+                            output.push(vec![a_start, a_end]);
+                        } else if b_end >= a_start {
+                            if b_start >= a_start {
+                                // a_start, a_end
+                                output.push(vec![a_start, a_end]);
+                            } else if b_start < a_start {
+                                // b_start, a_end
+                                output.push(vec![b_start, a_end]);
+                            }
+                        }
+                    } else if b_start < a_end {
+                        intersected = true;
+                        if b_start >= a_start {
+                            // a_start, b_end
+                            output.push(vec![a_start, b_end]);
+                        } else if b_start <= a_start {
+                            // b_start, b_end
+                            output.push(vec![b_start, b_end]);
+                        }
+                    } else if b_start == a_end {
+                        intersected = true;
+                        output.push(vec![a_start, b_end]);
+                    } else {
+                        output.push(vec![a_start, a_end]);
+                    }
                 }
-                inserted = true;
-            } else if a_start > b_start && a_end < b_end {
-                // ignore
-            } else if a_start > b_start && a_start < b_end && a_end > b_end && inserted && !merged {
-                // change last interval
-                let last_interval = output_intervals.pop().unwrap();
-                output_intervals.push(vec![last_interval[0], a_end]);
-                merged = true;
-            } else if a_start == b_end && a_end > b_end && inserted && !merged {
-                // change last interval
-                let last_interval = output_intervals.pop().unwrap();
-                output_intervals.push(vec![last_interval[0], a_end]);
-                merged = true;
-            } else {
-                output_intervals.push(vec![a_start, a_end]);
+                (true, false) => {
+                    // intersected, not done
+                    if a_start > b_end {
+                        done = true;
+                        output.push(vec![a_start, a_end]);
+                    } else if a_start <= b_end {
+                        if a_end < b_end {
+                            // skip
+                        } else if a_end >= b_end {
+                            done = true;
+                            let last_interval = output.pop().unwrap();
+                            output.push(vec![last_interval[0], a_end]);
+                        }
+                    }
+                }
+                (false, true) => {}
+                (true, true) => {
+                    output.push(vec![a_start, a_end]);
+                }
             }
         }
-        if !inserted {
-            output_intervals.push(new_interval);
+        if !done && !intersected {
+            output.push(new_interval);
         }
-        output_intervals
+
+        output
     }
 }
 
@@ -116,12 +134,7 @@ mod tests {
         let expected = vec![vec![1, 15]];
         assert_eq!(Solution::insert(intervals, new_interval), expected);
     }
-    /*
-        intervals =
-        [[1,5]]
-        newInterval =
-        [0,3]
-    */
+
     #[test]
     fn test_single_interval_inside_new_interval() {
         let intervals = vec![vec![1, 5]];
@@ -144,10 +157,31 @@ mod tests {
         assert_eq!(Solution::insert(intervals, new_interval), expected);
     }
     #[test]
-    fn test_b_swallows_a() {
+    fn test_b_partially_swallows_a() {
         let intervals = vec![vec![1, 5]];
         let new_interval = vec![0, 5];
         let expected = vec![vec![0, 5]];
+        assert_eq!(Solution::insert(intervals, new_interval), expected);
+    }
+    #[test]
+    fn test_b_swallows_a() {
+        let intervals = vec![vec![1, 5]];
+        let new_interval = vec![0, 6];
+        let expected = vec![vec![0, 6]];
+        assert_eq!(Solution::insert(intervals, new_interval), expected);
+    }
+    #[test]
+    fn test_single_interval_right_before() {
+        let intervals = vec![vec![1, 5]];
+        let new_interval = vec![5, 7];
+        let expected = vec![vec![1, 7]];
+        assert_eq!(Solution::insert(intervals, new_interval), expected);
+    }
+    #[test]
+    fn test_new_interval_merges_intervals() {
+        let intervals = vec![vec![1, 5], vec![6, 8]];
+        let new_interval = vec![5, 6];
+        let expected = vec![vec![1, 8]];
         assert_eq!(Solution::insert(intervals, new_interval), expected);
     }
 }
