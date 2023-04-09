@@ -2,24 +2,20 @@ use std::collections::VecDeque;
 
 struct Solution {}
 impl Solution {
+    fn eval_string(input_string: String) -> VecDeque<char> {
+        let mut stack = VecDeque::new();
+        input_string.chars().for_each(|letter| {
+            if letter == '#' {
+                stack.pop_front();
+            } else {
+                stack.push_front(letter);
+            }
+        });
+        stack
+    }
     pub fn backspace_compare(s: String, t: String) -> bool {
-        let mut s_stack = VecDeque::new();
-        let mut t_stack = VecDeque::new();
-
-        s.chars().for_each(|letter| {
-            if letter == '#' {
-                s_stack.pop_front();
-            } else {
-                s_stack.push_front(letter);
-            }
-        });
-        t.chars().for_each(|letter| {
-            if letter == '#' {
-                t_stack.pop_front();
-            } else {
-                t_stack.push_front(letter);
-            }
-        });
+        let s_stack = Solution::eval_string(s);
+        let t_stack = Solution::eval_string(t);
 
         s_stack == t_stack
     }
