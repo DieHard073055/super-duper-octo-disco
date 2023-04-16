@@ -31,18 +31,12 @@ impl MyQueue {
         if !self.pop_stack.is_empty() {
             self.pop_stack[self.pop_stack.len() - 1]
         } else {
-            self.push_stack[0]
+            *self.push_stack.first().unwrap()
         }
     }
 
     fn empty(&self) -> bool {
-        if !self.pop_stack.is_empty() {
-            false
-        } else if !self.push_stack.is_empty() {
-            false
-        } else {
-            true
-        }
+        self.pop_stack.is_empty() && self.push_stack.is_empty()
     }
 }
 
