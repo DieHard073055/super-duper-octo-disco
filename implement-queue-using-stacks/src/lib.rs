@@ -1,7 +1,6 @@
-use std::collections::VecDeque;
-
 struct MyQueue {
-    queue: VecDeque<i32>,
+    push_stack: Vec<i32>,
+    pop_stack: Vec<i32>,
 }
 
 /**
@@ -11,24 +10,39 @@ struct MyQueue {
 impl MyQueue {
     fn new() -> Self {
         MyQueue {
-            queue: VecDeque::new(),
+            push_stack: Vec::new(),
+            pop_stack: Vec::new(),
         }
     }
 
     fn push(&mut self, x: i32) {
-        self.queue.push_front(x);
+        self.push_stack.push(x);
     }
-
     fn pop(&mut self) -> i32 {
-        self.queue.pop_back().unwrap()
+        if self.pop_stack.is_empty() {
+            while let Some(x) = self.push_stack.pop() {
+                self.pop_stack.push(x);
+            }
+        }
+        self.pop_stack.pop().unwrap()
     }
 
     fn peek(&self) -> i32 {
-        self.queue.back().unwrap().clone()
+        if !self.pop_stack.is_empty() {
+            self.pop_stack[self.pop_stack.len() - 1]
+        } else {
+            self.push_stack[0]
+        }
     }
 
     fn empty(&self) -> bool {
-        self.queue.is_empty()
+        if !self.pop_stack.is_empty() {
+            false
+        } else if !self.push_stack.is_empty() {
+            false
+        } else {
+            true
+        }
     }
 }
 
