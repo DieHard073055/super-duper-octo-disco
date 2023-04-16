@@ -18,10 +18,8 @@ impl MinStack {
     fn push(&mut self, val: i32) {
         if self.min_stack.is_empty() {
             self.min_stack.push(val);
-        } else {
-            if self.min_stack[self.min_stack.len() - 1] >= val {
-                self.min_stack.push(val);
-            }
+        } else if self.min_stack[self.min_stack.len() - 1] >= val {
+            self.min_stack.push(val);
         }
         self.stack.push(val);
     }
