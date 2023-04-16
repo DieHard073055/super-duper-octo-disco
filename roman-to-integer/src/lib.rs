@@ -14,12 +14,9 @@ impl Solution {
         }
     }
     fn eval_roman_chars(next: i32, previous: i32) -> (bool, i32) {
-        // println!("eval roman char: next {:}, previous {:}", next, previous);
         if next > previous {
-            // println!("({:}, {:})", true, next - previous);
             return (true, next - previous);
         } else {
-            // println!("({:}, {:})", false, previous);
             return (false, previous);
         }
     }
@@ -32,15 +29,9 @@ impl Solution {
         let mut previous_idx = 0;
         let mut previous = Solution::roman_char_to_int(&s_letters[previous_idx]);
         let mut next_idx = 1;
-        // println!("s_letters: {:} - len: {:}", s, s_letters.len());
         while next_idx < s_letters.len() {
             previous = Solution::roman_char_to_int(&s_letters[previous_idx]);
             let next = Solution::roman_char_to_int(&s_letters[next_idx]);
-            // println!(
-            //    "while start: next idx {:}, previous idx {:}",
-            //    next_idx, previous_idx
-            //);
-            // println!("while start: next {:}, previous {:}", next, previous);
             let (skip, value) = Solution::eval_roman_chars(next, previous);
             if skip {
                 previous_idx += 1;
@@ -50,10 +41,6 @@ impl Solution {
             previous_idx += 1;
             next_idx += 1;
             total += value;
-            // println!(
-            //    "while end: next idx {:}, previous idx {:}",
-            //    next_idx, previous_idx
-            //);
         }
         if previous_idx < s_letters.len() {
             previous = Solution::roman_char_to_int(&s_letters[previous_idx]);
