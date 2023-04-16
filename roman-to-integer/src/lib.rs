@@ -10,7 +10,7 @@ impl Solution {
             'C' => 100,
             'D' => 500,
             'M' => 1000,
-            _ => !unreachable!("There should'nt be any more roman characters"),
+            _ => !unreachable!("There shouldn't be any more roman characters"),
         }
     }
     fn eval_roman_chars(next: i32, previous: i32) -> (bool, i32) {
