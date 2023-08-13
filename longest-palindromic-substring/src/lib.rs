@@ -52,7 +52,13 @@ impl Solution {
         let mut palindrome = String::from(s[0..1].to_string());
 
         // println!("window max: {:}", window_max_size);
+        let mut previous_palindrom_found = 0;
         for window_size in 1..window_max_size {
+            if previous_palindrom_found > 3 {
+                if (window_size - previous_palindrom_found) > 2 {
+                    return palindrome;
+                }
+            }
             let window_start_max = window_max_size - window_size;
             // println!("window start max: {:}", window_start_max);
             for window_start in 0..window_start_max {
@@ -65,11 +71,13 @@ impl Solution {
                     if window_string_letters[0] == window_string_letters[1] {
                         // println!("panlindrome set: {:}", window_string);
                         palindrome = window_string;
+                        previous_palindrom_found = window_size;
                     }
                 } else if window_string_letters.len() > 2 {
                     if Solution::is_palindrom(&window_string_letters) {
                         // println!("panlindrome set: {:}", window_string);
                         palindrome = window_string;
+                        previous_palindrom_found = window_size;
                     }
                 }
             }
